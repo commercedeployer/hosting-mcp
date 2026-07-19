@@ -1,0 +1,16 @@
+services:
+  mcp-hosting:
+    build: .
+    ports:
+      - "8088:80"
+    environment:
+      FILES_USER: admin
+      FILES_PASSWORD: changeme-dev-password
+      MCPHOSTING_MCP_KEYS: mch_mcp_live_dev_key_one,mch_mcp_live_dev_key_two
+      MCPHOSTING_PUBLIC_BASE_URL: http://localhost:8088
+    volumes:
+      - ./public:/var/www/public
+      - mcp-hosting-fb-db:/var/lib/filebrowser
+
+volumes:
+  mcp-hosting-fb-db:

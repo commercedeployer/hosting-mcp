@@ -1,0 +1,25 @@
+# Secrets and local env
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+mcp-server/node_modules/
+
+# Logs and OS
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Runtime / volumes
+data/
+*.db
+
+# Coverage / IDE
+coverage/
+.nyc_output/
+.vscode/
+.idea/
+.cursor/

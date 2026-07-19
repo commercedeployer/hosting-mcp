@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>mcp-hosting</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --fg: #e7ecf1;
+      --muted: #8b9aab;
+      --accent: #3d9cf0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, #1a2a3d, var(--bg));
+      color: var(--fg);
+      display: grid;
+      place-items: center;
+      padding: 2rem;
+    }
+    main { max-width: 36rem; }
+    h1 { font-size: 1.75rem; font-weight: 650; margin: 0 0 0.75rem; }
+    p { color: var(--muted); line-height: 1.55; margin: 0 0 1rem; }
+    a { color: var(--accent); }
+    code {
+      font-size: 0.9em;
+      background: rgba(255,255,255,0.06);
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>mcp-hosting</h1>
+    <p>Статический сайт из папки <code>public</code>. Правьте файлы в браузере через <a href="/files/">/files/</a> (Filebrowser) или через MCP на <code>/mcp</code>.</p>
+    <p>Замените этот <code>index.html</code> — изменения сразу видны на сайте.</p>
+  </main>
+</body>
+</html>
