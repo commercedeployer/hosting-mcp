@@ -21,14 +21,14 @@ function loadServerInstructions() {
   const file = path.join(DOC_ROOT, AGENT_DOC);
   if (!fs.existsSync(file)) {
     return [
-      'mcp-hosting: call mcphosting_capabilities, read resource mcphosting://docs/mcp-agent.',
-      'Edit static site via mcphosting_files_*; writes are live (no build).',
+      'hosting-mcp: call hostingmcp_capabilities, read resource hostingmcp://docs/mcp-agent.',
+      'Edit static site via hostingmcp_files_*; writes are live (no build).',
       'Access only the public folder. Not Commerce, Deployer, or MyReady MCP.',
     ].join('\n');
   }
   const raw = fs.readFileSync(file, 'utf8');
   if (raw.length <= INSTRUCTIONS_MAX) return raw;
-  return `${raw.slice(0, INSTRUCTIONS_MAX)}\n\n…[full playbook: resource mcphosting://docs/mcp-agent]`;
+  return `${raw.slice(0, INSTRUCTIONS_MAX)}\n\n…[full playbook: resource hostingmcp://docs/mcp-agent]`;
 }
 
 module.exports = { readMcpDoc, loadServerInstructions, DOC_ROOT };

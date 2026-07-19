@@ -30,8 +30,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/mcp-hosting:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/mcp-hosting:${{ github.ref_name }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/hosting-mcp:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/hosting-mcp:${{ github.ref_name }}
 
   ghcr:
     name: Push to GHCR

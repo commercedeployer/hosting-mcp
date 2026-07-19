@@ -73,7 +73,31 @@ async function readTextFile(publicRoot, relInput, maxBytes) {
   return { path: rel, size: st.size, content };
 }
 
-async function writeTextFile(publicRoot, relInput, content, maxBytes) {
+function assertStorageRoom(publicRoot, addBytes, maxStorageMb, replaceAbs = null) {
+  const limitMb = Number(maxStorageMb) || 0;
+  if (limitMb <= 0) return;
+  const limitBytes = limitMb * 1024 * 1024;
+  const usage = diskUsage(publicRoot);
+  let used = usage.usedBytes;
+  if (replaceAbs) {
+    try {
+      if (fs.existsSync(replaceAbs) && fs.statSync(replaceAbs).isFile()) {
+        used -= fs.statSync(replaceAbs).size;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  if (used + addBytes > limitBytes) {
+    const err = new Error(`storage_limit_exceeded:${limitMb}`);
+    err.code = 'storage_limit_exceeded';
+    err.limitMb = limitMb;
+    err.usedBytes = Math.max(0, used);
+    throw err;
+  }
+}
+
+async function writeTextFile(publicRoot, relInput, content, maxBytes, maxStorageMb = 0) {
   const { rel, abs } = resolveInsideRoot(publicRoot, relInput);
   if (!rel) {
     const err = new Error('invalid_path');
@@ -86,12 +110,13 @@ async function writeTextFile(publicRoot, relInput, content, maxBytes) {
     err.code = 'payload_too_large';
     throw err;
   }
+  assertStorageRoom(publicRoot, buf.length, maxStorageMb, abs);
   await ensureParentDir(abs);
   await fsp.writeFile(abs, buf);
   return { path: rel, size: buf.length };
 }
 
-async function writeBase64File(publicRoot, relInput, fileBase64, maxBytes) {
+async function writeBase64File(publicRoot, relInput, fileBase64, maxBytes, maxStorageMb = 0) {
   const { rel, abs } = resolveInsideRoot(publicRoot, relInput);
   if (!rel) {
     const err = new Error('invalid_path');
@@ -107,6 +132,7 @@ async function writeBase64File(publicRoot, relInput, fileBase64, maxBytes) {
     err.code = 'payload_too_large';
     throw err;
   }
+  assertStorageRoom(publicRoot, buf.length, maxStorageMb, abs);
   await ensureParentDir(abs);
   await fsp.writeFile(abs, buf);
   return { path: rel, size: buf.length };
@@ -242,4 +268,5 @@ module.exports = {
   walkTree,
   searchFiles,
   diskUsage,
+  assertStorageRoom,
 };

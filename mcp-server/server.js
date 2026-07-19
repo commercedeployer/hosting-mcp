@@ -143,7 +143,7 @@ function createMcpServer(configOverride) {
               prompts: { listChanged: false },
               resources: { subscribe: false, listChanged: false },
             },
-            serverInfo: { name: 'mcp-hosting', version: config.version },
+            serverInfo: { name: 'hosting-mcp', version: config.version },
             instructions: loadServerInstructions(),
           }),
         );

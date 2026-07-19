@@ -19,7 +19,7 @@ function main() {
   app.get('/healthz', (_req, res) => {
     res.json({
       ok: true,
-      product: 'mcp-hosting',
+      product: 'hosting-mcp',
       version: config.version,
       keysConfigured: config.keys.length,
     });
@@ -34,7 +34,7 @@ function main() {
 
   function onListen() {
     console.log(
-      `[mcp-hosting] listening ${config.listen} publicRoot=${config.publicRoot} keys=${config.keys.length}`,
+      `[hosting-mcp] listening ${config.listen} publicRoot=${config.publicRoot} keys=${config.keys.length}`,
     );
   }
 

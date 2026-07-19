@@ -8,7 +8,7 @@
 
 ## С чего начать
 
-1. `mcphosting_files_tree` — что уже есть.
+1. `hostingmcp_files_tree` — что уже есть.
 2. Прочитать `index.html` и связанные `*.css` / `*.js`.
 3. Менять минимально: один экран — один смысловой блок.
 
@@ -22,13 +22,13 @@ public/
   img/
 ```
 
-Каталоги — `mcphosting_files_mkdir`, ассеты — `mcphosting_files_write_base64` или `/files/`.
+Каталоги — `hostingmcp_files_mkdir`, ассеты — `hostingmcp_files_write_base64` или `/files/`.
 
 ## Человек + агент
 
 | Кто | Как |
 |-----|-----|
-| Агент | MCP `mcphosting_files_*` |
+| Агент | MCP `hostingmcp_files_*` |
 | Человек | браузер `/files/` (Ace-редактор Filebrowser) |
 
 Не правьте один файл одновременно с двух сторон.

@@ -15,7 +15,7 @@ describe('MCP HTTP', () => {
   const key = 'mch_mcp_live_test_key_0001';
 
   before(() => {
-    root = fs.mkdtempSync(path.join(os.tmpdir(), 'mcp-hosting-'));
+    root = fs.mkdtempSync(path.join(os.tmpdir(), 'hosting-mcp-'));
     fs.writeFileSync(path.join(root, 'index.html'), '<h1>seed</h1>');
     const config = {
       keys: [key],
@@ -63,7 +63,7 @@ describe('MCP HTTP', () => {
       .send({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} });
     assert.equal(list.status, 200);
     const tools = list.body.result.tools.map((t) => t.name);
-    assert.ok(tools.includes('mcphosting_files_write'));
+    assert.ok(tools.includes('hostingmcp_files_write'));
 
     const call = await request(app)
       .post('/mcp')
@@ -74,7 +74,7 @@ describe('MCP HTTP', () => {
         id: 3,
         method: 'tools/call',
         params: {
-          name: 'mcphosting_files_write',
+          name: 'hostingmcp_files_write',
           arguments: { path: 'index.html', content: '<h1>live</h1>' },
         },
       });

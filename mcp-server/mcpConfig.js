@@ -7,14 +7,14 @@ const { parseMcpToolsDeny } = require('./toolPolicy');
 const KEYS_MAX = 5;
 
 function parseKeysFromEnv() {
-  const fromList = String(process.env.MCPHOSTING_MCP_KEYS || '')
+  const fromList = String(process.env.HOSTINGMCP_MCP_KEYS || '')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
 
   const fromIndexed = [];
   for (let i = 1; i <= KEYS_MAX; i += 1) {
-    const v = String(process.env[`MCPHOSTING_MCP_KEY_${i}`] || '').trim();
+    const v = String(process.env[`HOSTINGMCP_MCP_KEY_${i}`] || '').trim();
     if (v) fromIndexed.push(v);
   }
 
@@ -30,14 +30,14 @@ function parseKeysFromEnv() {
 }
 
 function resolvePublicRoot() {
-  const raw = process.env.MCPHOSTING_PUBLIC_ROOT || process.env.PUBLIC_ROOT || '/var/www/public';
+  const raw = process.env.HOSTINGMCP_PUBLIC_ROOT || process.env.PUBLIC_ROOT || '/var/www/public';
   return path.resolve(raw);
 }
 
 function readVersion() {
   const candidates = [
     path.join(__dirname, '..', 'VERSION'),
-    '/opt/mcp-hosting/VERSION',
+    '/opt/hosting-mcp/VERSION',
   ];
   for (const f of candidates) {
     try {
@@ -55,21 +55,22 @@ function mcpConfig() {
     keys,
     keysMax: KEYS_MAX,
     publicRoot: resolvePublicRoot(),
-    publicBaseUrl: String(process.env.MCPHOSTING_PUBLIC_BASE_URL || '').replace(/\/$/, ''),
-    listen: process.env.MCPHOSTING_MCP_LISTEN || '127.0.0.1:3101',
-    toolsDeny: parseMcpToolsDeny(process.env.MCPHOSTING_MCP_TOOLS_DENY),
+    publicBaseUrl: String(process.env.HOSTINGMCP_PUBLIC_BASE_URL || '').replace(/\/$/, ''),
+    listen: process.env.HOSTINGMCP_MCP_LISTEN || '127.0.0.1:3101',
+    toolsDeny: parseMcpToolsDeny(process.env.HOSTINGMCP_MCP_TOOLS_DENY),
     version: readVersion(),
     rateLimit: {
-      windowMs: parseInt(process.env.MCPHOSTING_MCP_RATE_WINDOW_MS || '60000', 10),
-      maxPerWindow: parseInt(process.env.MCPHOSTING_MCP_RATE_MAX || '120', 10),
+      windowMs: parseInt(process.env.HOSTINGMCP_MCP_RATE_WINDOW_MS || '60000', 10),
+      maxPerWindow: parseInt(process.env.HOSTINGMCP_MCP_RATE_MAX || '120', 10),
     },
     concurrency: {
-      maxConcurrent: parseInt(process.env.MCPHOSTING_MCP_MAX_CONCURRENT || '4', 10),
-      maxQueued: parseInt(process.env.MCPHOSTING_MCP_MAX_QUEUED || '16', 10),
-      queueTimeoutMs: parseInt(process.env.MCPHOSTING_MCP_QUEUE_TIMEOUT_MS || '60000', 10),
+      maxConcurrent: parseInt(process.env.HOSTINGMCP_MCP_MAX_CONCURRENT || '4', 10),
+      maxQueued: parseInt(process.env.HOSTINGMCP_MCP_MAX_QUEUED || '16', 10),
+      queueTimeoutMs: parseInt(process.env.HOSTINGMCP_MCP_QUEUE_TIMEOUT_MS || '60000', 10),
     },
-    readMaxBytes: parseInt(process.env.MCPHOSTING_MCP_READ_MAX_BYTES || String(2 * 1024 * 1024), 10),
-    writeMaxBytes: parseInt(process.env.MCPHOSTING_MCP_WRITE_MAX_BYTES || String(5 * 1024 * 1024), 10),
+    readMaxBytes: parseInt(process.env.HOSTINGMCP_MCP_READ_MAX_BYTES || String(2 * 1024 * 1024), 10),
+    writeMaxBytes: parseInt(process.env.HOSTINGMCP_MCP_WRITE_MAX_BYTES || String(5 * 1024 * 1024), 10),
+    maxStorageMb: Math.max(0, parseInt(process.env.HOSTINGMCP_MAX_STORAGE_MB || '1024', 10) || 0),
   };
 }
 

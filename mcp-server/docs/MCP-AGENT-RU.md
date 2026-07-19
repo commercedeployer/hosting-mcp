@@ -1,14 +1,14 @@
-# mcp-hosting MCP — playbook для агента
+# hosting-mcp MCP — playbook для агента
 
-Документ для **агента** (Cursor, Claude), подключённого к mcp-hosting MCP (`POST …/mcp`, Bearer из env).
+Документ для **агента** (Cursor, Claude), подключённого к hosting-mcp MCP (`POST …/mcp`, Bearer из env).
 
-Человеку: resource `mcphosting://docs/mcp-setup` / файл [`MCP-v1-RU.md`](MCP-v1-RU.md).
+Человеку: resource `hostingmcp://docs/mcp-setup` / файл [`MCP-v1-RU.md`](MCP-v1-RU.md).
 
 ---
 
 ## 1. Что ты управляешь
 
-**mcp-hosting** — один контейнер: статический сайт из папки `public`, Filebrowser на `/files/`, MCP на `/mcp`.
+**hosting-mcp** — один контейнер: статический сайт из папки `public`, Filebrowser на `/files/`, MCP на `/mcp`.
 
 | Через MCP | Не твой контур |
 |-----------|----------------|
@@ -23,13 +23,13 @@
 ## 2. Первые 30 секунд
 
 ```
-1. mcphosting_capabilities
-2. mcphosting_health
-3. resource mcphosting://docs/mcp-agent (этот файл)
-4. mcphosting_files_tree { path: "" }
+1. hostingmcp_capabilities
+2. hostingmcp_health
+3. resource hostingmcp://docs/mcp-agent (этот файл)
+4. hostingmcp_files_tree { path: "" }
 ```
 
-Prompt: `mcphosting_agent_onboarding`.
+Prompt: `hostingmcp_agent_onboarding`.
 
 ---
 
@@ -45,27 +45,27 @@ Prompt: `mcphosting_agent_onboarding`.
 
 | Группа | Tools |
 |--------|--------|
-| Meta | `mcphosting_capabilities`, `mcphosting_health`, `mcphosting_storage_usage` |
-| Files | `mcphosting_files_list/read/write/write_base64/mkdir/move/delete/tree/search` |
+| Meta | `hostingmcp_capabilities`, `hostingmcp_health`, `hostingmcp_storage_usage` |
+| Files | `hostingmcp_files_list/read/write/write_base64/mkdir/move/delete/tree/search` |
 
-Destructive: `mcphosting_files_delete` — только по явной просьбе пользователя. Нельзя удалить корень `public`.
+Destructive: `hostingmcp_files_delete` — только по явной просьбе пользователя. Нельзя удалить корень `public`.
 
-Полный каталог: `mcphosting://docs/mcp-tools`.
+Полный каталог: `hostingmcp://docs/mcp-tools`.
 
 ---
 
 ## 5. Типовой сценарий — лендинг
 
 ```
-mcphosting_files_read { path: "index.html" }
+hostingmcp_files_read { path: "index.html" }
  → правки HTML/CSS/JS
-mcphosting_files_write { path: "index.html", content: "…" }
+hostingmcp_files_write { path: "index.html", content: "…" }
  → пользователь обновляет / в браузере
 ```
 
-Картинки: `mcphosting_files_write_base64` или человек через `/files/`.
+Картинки: `hostingmcp_files_write_base64` или человек через `/files/`.
 
-Workflow: `mcphosting://docs/site-workflow`, prompt `mcphosting_landing_edit`.
+Workflow: `hostingmcp://docs/site-workflow`, prompt `hostingmcp_landing_edit`.
 
 ---
 
@@ -73,16 +73,16 @@ Workflow: `mcphosting://docs/site-workflow`, prompt `mcphosting_landing_edit`.
 
 | Симптом | Действие |
 |---------|----------|
-| 401 unauthorized | Нет/неверный Bearer; проверь env `MCPHOSTING_MCP_KEYS` |
+| 401 unauthorized | Нет/неверный Bearer; проверь env `HOSTINGMCP_MCP_KEYS` |
 | `path_escape` | Убери `..` / абсолютный путь |
-| `tool_disabled_by_policy` | Tool в `MCPHOSTING_MCP_TOOLS_DENY` |
+| `tool_disabled_by_policy` | Tool в `HOSTINGMCP_MCP_TOOLS_DENY` |
 | 503 `mcp_server_busy` | Повтори через 2–5 с |
 
 ---
 
 ## 7. Чеклист завершения
 
-- [ ] `mcphosting_capabilities` в начале
+- [ ] `hostingmcp_capabilities` в начале
 - [ ] Правки только в `public`
 - [ ] Destructive — было согласие
 - [ ] Не путать с Commerce / Deployer / MyReady

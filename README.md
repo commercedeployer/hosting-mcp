@@ -1,4 +1,4 @@
-# mcp-hosting
+# hosting-mcp
 
 OSS Docker image: **static site hosting** + **Filebrowser** + **MCP** for AI agents.
 
@@ -13,7 +13,7 @@ One volume `public` is both the live website (nginx) and the only tree editable 
 ## Quick start (dev)
 
 ```bash
-cd mcp-hosting
+cd hosting-mcp
 docker compose -f docker-compose.dev.yml up --build
 ```
 
@@ -30,10 +30,10 @@ See [`.env.example`](.env.example) and [`mcp-server/docs/MCP-v1-RU.md`](mcp-serv
 | Variable | Purpose |
 |----------|---------|
 | `FILES_USER` / `FILES_PASSWORD` | Filebrowser login (`FILES_PASSWORD` required) |
-| `MCPHOSTING_MCP_KEYS` | Up to 5 Bearer keys, comma-separated |
-| `MCPHOSTING_MCP_KEY_1` … `_5` | Alternative / extra keys |
-| `MCPHOSTING_MCP_TOOLS_DENY` | Optional tool denylist |
-| `MCPHOSTING_PUBLIC_BASE_URL` | Public base URL (Cursor hints), no trailing slash |
+| `HOSTINGMCP_MCP_KEYS` | Up to 5 Bearer keys, comma-separated |
+| `HOSTINGMCP_MCP_KEY_1` … `_5` | Alternative / extra keys |
+| `HOSTINGMCP_MCP_TOOLS_DENY` | Optional tool denylist |
+| `HOSTINGMCP_PUBLIC_BASE_URL` | Public base URL (Cursor hints), no trailing slash |
 
 Recommended key shape: `mch_mcp_live_…` (any long random secret works).
 
@@ -61,13 +61,13 @@ Workflow [`.github/workflows/publish-image.yml`](.github/workflows/publish-image
 
 | Registry | Image |
 |----------|--------|
-| **GHCR** | `ghcr.io/commercedeployer/mcp-hosting:latest` |
-| **Docker Hub** | `commercedeployer/mcp-hosting:latest` |
+| **GHCR** | `ghcr.io/commercedeployer/hosting-mcp:latest` |
+| **Docker Hub** | `commercedeployer/hosting-mcp:latest` |
 
 ```bash
-docker pull ghcr.io/commercedeployer/mcp-hosting:latest
+docker pull ghcr.io/commercedeployer/hosting-mcp:latest
 # or
-docker pull commercedeployer/mcp-hosting:latest
+docker pull commercedeployer/hosting-mcp:latest
 ```
 
 Release: push tag `v*` → CI builds and pushes both registries. **Do not** manually `docker build` + `docker push` release images.
@@ -79,7 +79,7 @@ CI on PR/main: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — unit t
 ## Deployer template
 
 Operator template (Traefik labels, volumes):  
-[`stores/deployer-templates/mcp-hosting.json`](../stores/deployer-templates/mcp-hosting.json)
+[`stores/deployer-templates/hosting-mcp.json`](../stores/deployer-templates/hosting-mcp.json)
 
 ## Architecture
 

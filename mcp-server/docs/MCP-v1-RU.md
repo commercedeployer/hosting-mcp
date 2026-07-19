@@ -1,4 +1,4 @@
-# mcp-hosting MCP — настройка (для человека)
+# hosting-mcp MCP — настройка (для человека)
 
 ## Что это
 
@@ -6,8 +6,8 @@
 
 Образы релиза (org **commercedeployer**):
 
-- `ghcr.io/commercedeployer/mcp-hosting:latest`
-- `commercedeployer/mcp-hosting:latest`
+- `ghcr.io/commercedeployer/hosting-mcp:latest`
+- `commercedeployer/hosting-mcp:latest`
 
 ## Переменные окружения
 
@@ -15,10 +15,10 @@
 |------------|------------|
 | `FILES_USER` | Логин Filebrowser (по умолчанию `admin`) |
 | `FILES_PASSWORD` | Пароль Filebrowser (**обязателен**) |
-| `MCPHOSTING_MCP_KEYS` | До **5** Bearer-ключей через запятую |
-| `MCPHOSTING_MCP_KEY_1` … `_5` | Альтернатива / дополнение к списку |
-| `MCPHOSTING_MCP_TOOLS_DENY` | Имена tools через запятую — скрыть |
-| `MCPHOSTING_PUBLIC_BASE_URL` | Публичный URL (для подсказок Cursor), без `/` в конце |
+| `HOSTINGMCP_MCP_KEYS` | До **5** Bearer-ключей через запятую |
+| `HOSTINGMCP_MCP_KEY_1` … `_5` | Альтернатива / дополнение к списку |
+| `HOSTINGMCP_MCP_TOOLS_DENY` | Имена tools через запятую — скрыть |
+| `HOSTINGMCP_PUBLIC_BASE_URL` | Публичный URL (для подсказок Cursor), без `/` в конце |
 
 Рекомендуемый вид ключа: `mch_mcp_live_…` (любая длинная случайная строка).
 
@@ -29,7 +29,7 @@
 ```json
 {
   "mcpServers": {
-    "mcp-hosting": {
+    "hosting-mcp": {
       "url": "https://YOUR_DOMAIN/mcp",
       "headers": {
         "Authorization": "Bearer mch_mcp_live_ВАШ_КЛЮЧ"
@@ -44,7 +44,7 @@ Dev: `http://localhost:8088/mcp`.
 ## Локальный запуск
 
 ```bash
-cd mcp-hosting
+cd hosting-mcp
 docker compose -f docker-compose.dev.yml up --build
 ```
 
@@ -54,7 +54,7 @@ docker compose -f docker-compose.dev.yml up --build
 
 ## Deploy через Deployer
 
-Шаблон: `stores/deployer-templates/mcp-hosting.json`  
+Шаблон: `stores/deployer-templates/hosting-mcp.json`  
 Поля: домен, пароль `/files/`, строка MCP-ключей. Volume `public` + БД Filebrowser.
 
 ## Безопасность

@@ -1,10 +1,10 @@
-# mcp-hosting — гайд для AI-агента
+# hosting-mcp — гайд для AI-агента
 
 ## Что это
 
 OSS-сосед workspace: Docker-образ **nginx + Filebrowser + MCP** для статического хостинга папки `public`.
 
-Org GitHub / образы: **commercedeployer/mcp-hosting** (GHCR + Docker Hub), как Deployer.
+Org GitHub / образы: **commercedeployer/hosting-mcp** (GHCR + Docker Hub), как Deployer.
 
 ## Где код
 
@@ -19,17 +19,17 @@ Org GitHub / образы: **commercedeployer/mcp-hosting** (GHCR + Docker Hub),
 ## Правила
 
 - Правки сайта — только дерево `public` (path jail).
-- Ключи MCP — только env (`MCPHOSTING_MCP_KEYS`), до 5; не через MCP tools.
+- Ключи MCP — только env (`HOSTINGMCP_MCP_KEYS`), до 5; не через MCP tools.
 - Не путать с MyReady (Hugo), Commerce, Deployer.
 - Релиз образа — только CI по тегу `v*`, не push руками.
-- Оффер в Commerce — только по явной просьбе.
+- Оффер в Commerce — Hosting 1GB (Store); шаблон `hosting-mcp`: `NAME` + опциональный `CUSTOM_DOMAIN`, лимит диска `HOSTINGMCP_MAX_STORAGE_MB`.
 
 ## Старт MCP-сессии
 
-1. `mcphosting_capabilities`
-2. Resource `mcphosting://docs/mcp-agent`
-3. `mcphosting_files_*` для правок (live, без build)
+1. `hostingmcp_capabilities`
+2. Resource `hostingmcp://docs/mcp-agent`
+3. `hostingmcp_files_*` для правок (live, без build)
 
 ## Шаблон Deployer
 
-`stores/deployer-templates/mcp-hosting.json`
+`stores/deployer-templates/hosting-mcp.json`
