@@ -14,7 +14,7 @@ FROM nginx:1.27-alpine
 RUN apk add --no-cache nodejs ca-certificates \
   && mkdir -p /var/www/public /var/lib/filebrowser /opt/mcp-hosting
 
-COPY --from=builder-filebrowser /filebrowser /usr/local/bin/filebrowser
+COPY --from=builder-filebrowser /bin/filebrowser /usr/local/bin/filebrowser
 COPY --from=builder-mcp /opt/mcp-hosting/mcp-server /opt/mcp-hosting/mcp-server
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY docker/entrypoint.sh /entrypoint.sh
