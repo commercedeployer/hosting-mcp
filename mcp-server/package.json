@@ -1,6 +1,6 @@
 {
   "name": "hosting-mcp-server",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "description": "HTTP MCP server for hosting-mcp (static public folder)",
   "main": "index.js",
