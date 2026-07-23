@@ -162,6 +162,130 @@ async function movePath(publicRoot, fromInput, toInput) {
   return { from: from.rel, to: to.rel };
 }
 
+async function copyPath(publicRoot, fromInput, toInput) {
+  const from = resolveInsideRoot(publicRoot, fromInput);
+  const to = resolveInsideRoot(publicRoot, toInput);
+  if (!from.rel || !to.rel) {
+    const err = new Error('invalid_path');
+    err.code = 'invalid_path';
+    throw err;
+  }
+  await ensureParentDir(to.abs);
+  await fsp.cp(from.abs, to.abs, { recursive: true, errorOnExist: true, force: false });
+  return { from: from.rel, to: to.rel };
+}
+
+/**
+ * Extract a zip (base64) into publicRoot/destRel. Rejects path escape, absolute
+ * entries, and symlinks. Enforces archive size, uncompressed budget, storage quota.
+ */
+async function importZipBase64(
+  publicRoot,
+  destRelInput,
+  fileBase64,
+  {
+    maxArchiveBytes,
+    maxUncompressedBytes,
+    maxStorageMb = 0,
+  } = {},
+) {
+  const AdmZip = require('adm-zip');
+  const dest = resolveInsideRoot(publicRoot, destRelInput || '');
+  const buf = Buffer.from(String(fileBase64 || ''), 'base64');
+  if (!buf.length) {
+    const err = new Error('empty_archive');
+    err.code = 'empty_archive';
+    throw err;
+  }
+  if (maxArchiveBytes && buf.length > maxArchiveBytes) {
+    const err = new Error(`payload_too_large:${buf.length}`);
+    err.code = 'payload_too_large';
+    throw err;
+  }
+
+  let zip;
+  try {
+    zip = new AdmZip(buf);
+  } catch (e) {
+    const err = new Error('invalid_zip');
+    err.code = 'invalid_zip';
+    err.cause = e;
+    throw err;
+  }
+
+  const entries = zip.getEntries();
+  let uncompressed = 0;
+  const planned = [];
+
+  for (const entry of entries) {
+    const rawName = String(entry.entryName || '').replace(/\\/g, '/');
+    if (!rawName || rawName.endsWith('/')) continue;
+    if (rawName.startsWith('/') || /^[a-zA-Z]:/.test(rawName)) {
+      const err = new Error('zip_path_escape');
+      err.code = 'zip_path_escape';
+      throw err;
+    }
+    const parts = rawName.split('/').filter((s) => s && s !== '.');
+    if (parts.some((s) => s === '..')) {
+      const err = new Error('zip_path_escape');
+      err.code = 'zip_path_escape';
+      throw err;
+    }
+    // Skip symlink-looking attrs if present (adm-zip attr bit).
+    const attr = entry.attr >>> 0;
+    if ((attr & 0o170000) === 0o120000) {
+      const err = new Error('zip_symlink_rejected');
+      err.code = 'zip_symlink_rejected';
+      throw err;
+    }
+    const relInside = parts.join('/');
+    const rel = dest.rel ? `${dest.rel}/${relInside}` : relInside;
+    resolveInsideRoot(publicRoot, rel);
+    const size = Number(entry.header?.size) || 0;
+    uncompressed += size;
+    planned.push({ entry, rel, size });
+  }
+
+  if (maxUncompressedBytes && uncompressed > maxUncompressedBytes) {
+    const err = new Error(`uncompressed_too_large:${uncompressed}`);
+    err.code = 'uncompressed_too_large';
+    throw err;
+  }
+  assertStorageRoom(publicRoot, uncompressed, maxStorageMb, null);
+
+  await fsp.mkdir(dest.abs, { recursive: true });
+  const written = [];
+  for (const item of planned) {
+    const { abs } = resolveInsideRoot(publicRoot, item.rel);
+    await ensureParentDir(abs);
+    const data = item.entry.getData();
+    await fsp.writeFile(abs, data);
+    try {
+      await fsp.chmod(abs, 0o644);
+    } catch {
+      /* ignore */
+    }
+    written.push({ path: item.rel, size: data.length });
+  }
+
+  // Ensure dirs are traversable by nginx (user nginx).
+  try {
+    const { execFileSync } = require('node:child_process');
+    execFileSync('chmod', ['-R', 'a+rX', dest.abs], { stdio: 'ignore' });
+  } catch {
+    /* Windows / missing chmod — best-effort */
+  }
+
+  return {
+    dest: dest.rel || '.',
+    archiveBytes: buf.length,
+    uncompressedBytes: uncompressed,
+    filesWritten: written.length,
+    files: written.slice(0, 200),
+    truncated: written.length > 200,
+  };
+}
+
 async function deletePath(publicRoot, relInput) {
   const { rel, abs } = resolveInsideRoot(publicRoot, relInput);
   if (!rel) {
@@ -264,6 +388,8 @@ module.exports = {
   writeBase64File,
   mkdirp,
   movePath,
+  copyPath,
+  importZipBase64,
   deletePath,
   walkTree,
   searchFiles,

@@ -23,6 +23,7 @@ public/
 ```
 
 Каталоги — `hostingmcp_files_mkdir`, ассеты — `hostingmcp_files_write_base64` или `/files/`.
+Целый сайт одним архивом — `hostingmcp_files_import_zip` (`fileBase64` zip).
 
 ## Человек + агент
 

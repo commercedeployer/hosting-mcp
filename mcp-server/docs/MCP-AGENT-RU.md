@@ -38,6 +38,8 @@ Prompt: `hostingmcp_agent_onboarding`.
 - Все пути **относительно** корня `public` (например `index.html`, `css/main.css`).
 - Запрещены `..`, абсолютные пути вне root → `path_escape`.
 - Запись в файл = сразу на сайте (nginx отдаёт тот же volume). **Сборки нет.**
+- Видео/картинки: `hostingmcp_files_write_base64` (лимит — `maxUploadMb` / `writeMaxBytes` в capabilities, env `HOSTINGMCP_MCP_MAX_UPLOAD_MB`). Уже на диске — `move` / `copy`. Целый сайт: `import_zip`. Крупнее — `/files/`.
+- После правок: `hostingmcp_site_smoke`.
 
 ---
 
@@ -45,8 +47,8 @@ Prompt: `hostingmcp_agent_onboarding`.
 
 | Группа | Tools |
 |--------|--------|
-| Meta | `hostingmcp_capabilities`, `hostingmcp_health`, `hostingmcp_storage_usage` |
-| Files | `hostingmcp_files_list/read/write/write_base64/mkdir/move/delete/tree/search` |
+| Meta | `hostingmcp_capabilities`, `hostingmcp_health`, `hostingmcp_storage_usage`, `hostingmcp_site_smoke` |
+| Files | `hostingmcp_files_list/read/write/write_base64/mkdir/move/copy/import_zip/delete/tree/search` |
 
 Destructive: `hostingmcp_files_delete` — только по явной просьбе пользователя. Нельзя удалить корень `public`.
 

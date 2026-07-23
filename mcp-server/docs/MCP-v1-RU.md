@@ -4,27 +4,42 @@
 
 Один Docker-образ: сайт из `public`, Filebrowser на `/files/`, MCP на `/mcp`.
 
-Образы релиза (org **commercedeployer**):
-
-- `ghcr.io/commercedeployer/hosting-mcp:latest`
-- `commercedeployer/hosting-mcp:latest`
+Образы: `ghcr.io/commercedeployer/hosting-mcp:latest` / `commercedeployer/hosting-mcp:latest`.
 
 ## Переменные окружения
 
-| Переменная | Назначение |
-|------------|------------|
-| `FILES_USER` | Логин Filebrowser (по умолчанию `admin`) |
-| `FILES_PASSWORD` | Пароль Filebrowser (**обязателен**) |
-| `HOSTINGMCP_MCP_KEYS` | До **5** Bearer-ключей через запятую |
-| `HOSTINGMCP_MCP_KEY_1` … `_5` | Альтернатива / дополнение к списку |
-| `HOSTINGMCP_MCP_TOOLS_DENY` | Имена tools через запятую — скрыть |
-| `HOSTINGMCP_PUBLIC_BASE_URL` | Публичный URL (для подсказок Cursor), без `/` в конце |
+Только то, что реально настраивают. Остальное (rate limit, режимы файлов, JSON/nginx body) считается из дефолтов и `HOSTINGMCP_MCP_MAX_UPLOAD_MB`.
 
-Рекомендуемый вид ключа: `mch_mcp_live_…` (любая длинная случайная строка).
+### Доступ
 
-Ключи **только в env** — UI выпуска ключей нет (намеренно, для простого хостинга).
+| Переменная | Default | Назначение |
+|------------|---------|------------|
+| `FILES_PASSWORD` | — | Пароль `/files/` (**обязателен**) |
+| `FILES_USER` | `admin` | Логин Filebrowser |
+| `HOSTINGMCP_MCP_KEYS` | — | До 5 Bearer-ключей через запятую |
+| `HOSTINGMCP_MCP_KEY_1` … `_5` | — | Доп. ключи |
+| `HOSTINGMCP_MCP_TOOLS_DENY` | — | Скрыть tools (имена через запятую) |
 
-## Cursor `.cursor/mcp.json`
+### URL
+
+| Переменная | Default | Назначение |
+|------------|---------|------------|
+| `HOSTINGMCP_PUBLIC_BASE_URL` | из FREE/CUSTOM | Публичный URL без `/` |
+| `HOSTINGMCP_FREE_HOST` | — | Бесплатный хост |
+| `HOSTINGMCP_CUSTOM_DOMAIN` | — | Свой домен (301 с FREE, если другой) |
+
+### Квоты
+
+| Переменная | Default | Назначение |
+|------------|---------|------------|
+| `HOSTINGMCP_MAX_STORAGE_MB` | `1024` | Мягкий лимит диска для MCP-записи |
+| `HOSTINGMCP_MCP_MAX_UPLOAD_MB` | `25` | Один рычаг: макс. файл/zip через MCP; от него считаются JSON body и nginx `/mcp` |
+
+Ключ: `mch_mcp_live_…`. Выпуск только через env.
+
+Пример: [`.env.example`](../../.env.example).
+
+## Cursor
 
 ```json
 {
@@ -39,27 +54,14 @@
 }
 ```
 
-Dev: `http://localhost:8088/mcp`.
-
-## Локальный запуск
+## Локально
 
 ```bash
-cd hosting-mcp
 docker compose -f docker-compose.dev.yml up --build
 ```
 
-- Сайт: http://localhost:8088/
-- Файлы: http://localhost:8088/files/
-- MCP: http://localhost:8088/mcp
-
-## Deploy через Deployer
-
-Шаблон: `stores/deployer-templates/hosting-mcp.json`  
-Поля: домен, пароль `/files/`, строка MCP-ключей. Volume `public` + БД Filebrowser.
+Сайт / files / mcp: `http://localhost:8088/`, `/files/`, `/mcp`.
 
 ## Безопасность
 
-- Не публикуй слабый `FILES_PASSWORD`.
-- Ключи MCP — секреты; не коммить в git.
-- MCP и Filebrowser видят **только** volume `public`.
-- На VPS ставь образ из CI (`v*` тег), не собирай релиз руками.
+Слабый `FILES_PASSWORD` не публиковать. Ключи не в git. Релиз образа — только CI по тегу `v*`.

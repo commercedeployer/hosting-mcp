@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('node:fs');
+const http = require('node:http');
 const { mcpConfig } = require('./mcpConfig');
 const jail = require('./fsJail');
 
@@ -25,6 +26,13 @@ async function hostingmcp_capabilities(ctx) {
     mcpUrl: cfg.publicBaseUrl ? `${cfg.publicBaseUrl}/mcp` : null,
     filesUrl: cfg.publicBaseUrl ? `${cfg.publicBaseUrl}/files/` : '/files/',
     maxStorageMb: cfg.maxStorageMb || null,
+    writeMaxBytes: cfg.writeMaxBytes,
+    readMaxBytes: cfg.readMaxBytes,
+    jsonBodyLimit: cfg.jsonBodyLimit,
+    importMaxUncompressedBytes: cfg.importMaxUncompressedBytes,
+    maxUploadMb: cfg.maxUploadMb,
+    hint:
+      'Tune HOSTINGMCP_MCP_MAX_UPLOAD_MB / HOSTINGMCP_MAX_STORAGE_MB. Dump site: files_import_zip. Large media → /files/.',
   });
 }
 
@@ -52,6 +60,41 @@ async function hostingmcp_storage_usage(ctx) {
     ...usage,
     maxStorageMb: maxStorageMb || null,
     maxStorageBytes: maxStorageMb > 0 ? maxStorageMb * 1024 * 1024 : null,
+  });
+}
+
+async function hostingmcp_site_smoke(ctx) {
+  const cfg = cfgOf(ctx);
+  const indexAbs = require('node:path').join(cfg.publicRoot, 'index.html');
+  const indexPresent = fs.existsSync(indexAbs) && fs.statSync(indexAbs).isFile();
+  let httpStatus = null;
+  let httpError = null;
+  try {
+    httpStatus = await new Promise((resolve, reject) => {
+      const req = http.request(
+        { host: '127.0.0.1', port: 80, path: '/', method: 'HEAD', timeout: 3000 },
+        (res) => {
+          res.resume();
+          resolve(res.statusCode || 0);
+        },
+      );
+      req.on('timeout', () => {
+        req.destroy();
+        reject(new Error('timeout'));
+      });
+      req.on('error', reject);
+      req.end();
+    });
+  } catch (e) {
+    httpError = e?.message || String(e);
+  }
+  const okHttp = httpStatus === 200 || httpStatus === 301 || httpStatus === 302;
+  return ok({
+    indexPresent,
+    httpStatus,
+    httpError,
+    publicBaseUrl: cfg.publicBaseUrl || null,
+    status: indexPresent && (httpStatus == null || okHttp) ? 'ok' : 'degraded',
   });
 }
 
@@ -95,6 +138,22 @@ async function hostingmcp_files_move(ctx, args) {
   return ok(await jail.movePath(cfg.publicRoot, args?.from, args?.to));
 }
 
+async function hostingmcp_files_copy(ctx, args) {
+  const cfg = cfgOf(ctx);
+  return ok(await jail.copyPath(cfg.publicRoot, args?.from, args?.to));
+}
+
+async function hostingmcp_files_import_zip(ctx, args) {
+  const cfg = cfgOf(ctx);
+  return ok(
+    await jail.importZipBase64(cfg.publicRoot, args?.destPath || '', args?.fileBase64, {
+      maxArchiveBytes: cfg.writeMaxBytes,
+      maxUncompressedBytes: cfg.importMaxUncompressedBytes,
+      maxStorageMb: cfg.maxStorageMb,
+    }),
+  );
+}
+
 async function hostingmcp_files_delete(ctx, args) {
   const cfg = cfgOf(ctx);
   return ok(await jail.deletePath(cfg.publicRoot, args?.path));
@@ -118,12 +177,15 @@ function createHandlers() {
     hostingmcp_capabilities,
     hostingmcp_health,
     hostingmcp_storage_usage,
+    hostingmcp_site_smoke,
     hostingmcp_files_list,
     hostingmcp_files_read,
     hostingmcp_files_write,
     hostingmcp_files_write_base64,
     hostingmcp_files_mkdir,
     hostingmcp_files_move,
+    hostingmcp_files_copy,
+    hostingmcp_files_import_zip,
     hostingmcp_files_delete,
     hostingmcp_files_tree,
     hostingmcp_files_search,

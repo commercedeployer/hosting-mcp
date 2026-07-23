@@ -28,7 +28,11 @@ describe('MCP HTTP', () => {
       rateLimit: { windowMs: 60_000, maxPerWindow: 1000 },
       concurrency: { maxConcurrent: 4, maxQueued: 16, queueTimeoutMs: 60_000 },
       readMaxBytes: 2 * 1024 * 1024,
-      writeMaxBytes: 5 * 1024 * 1024,
+      writeMaxBytes: 25 * 1024 * 1024,
+      jsonBodyLimit: '40mb',
+      importMaxUncompressedBytes: 100 * 1024 * 1024,
+      maxUploadMb: 25,
+      maxStorageMb: 1024,
     };
     app = express();
     app.use('/mcp', createMcpServer(config));

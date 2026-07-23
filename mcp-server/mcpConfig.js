@@ -49,8 +49,29 @@ function readVersion() {
   return require('./package.json').version || '0.0.0';
 }
 
+function parsePositiveInt(raw, fallback) {
+  const n = parseInt(String(raw ?? ''), 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+/**
+ * One public knob: HOSTINGMCP_MCP_MAX_UPLOAD_MB (default 25).
+ * Derives write/json/import ceilings so operators do not tune 5 related vars.
+ */
+function resolveUploadLimits() {
+  const uploadMb = parsePositiveInt(process.env.HOSTINGMCP_MCP_MAX_UPLOAD_MB, 25);
+  const writeMaxBytes = uploadMb * 1024 * 1024;
+  // base64 ≈ +33% + MCP JSON envelope
+  const jsonBodyLimit = `${Math.max(40, Math.ceil(uploadMb * 1.6))}mb`;
+  // zip may expand; keep a floor so a full small site still fits
+  const importMaxUncompressedBytes = Math.max(100, uploadMb * 4) * 1024 * 1024;
+  const readMaxBytes = 2 * 1024 * 1024;
+  return { uploadMb, writeMaxBytes, jsonBodyLimit, importMaxUncompressedBytes, readMaxBytes };
+}
+
 function mcpConfig() {
   const keys = parseKeysFromEnv();
+  const limits = resolveUploadLimits();
   return {
     keys,
     keysMax: KEYS_MAX,
@@ -60,18 +81,33 @@ function mcpConfig() {
     toolsDeny: parseMcpToolsDeny(process.env.HOSTINGMCP_MCP_TOOLS_DENY),
     version: readVersion(),
     rateLimit: {
-      windowMs: parseInt(process.env.HOSTINGMCP_MCP_RATE_WINDOW_MS || '60000', 10),
-      maxPerWindow: parseInt(process.env.HOSTINGMCP_MCP_RATE_MAX || '120', 10),
+      windowMs: 60_000,
+      maxPerWindow: 120,
     },
     concurrency: {
-      maxConcurrent: parseInt(process.env.HOSTINGMCP_MCP_MAX_CONCURRENT || '4', 10),
-      maxQueued: parseInt(process.env.HOSTINGMCP_MCP_MAX_QUEUED || '16', 10),
-      queueTimeoutMs: parseInt(process.env.HOSTINGMCP_MCP_QUEUE_TIMEOUT_MS || '60000', 10),
+      maxConcurrent: 4,
+      maxQueued: 16,
+      queueTimeoutMs: 60_000,
     },
-    readMaxBytes: parseInt(process.env.HOSTINGMCP_MCP_READ_MAX_BYTES || String(2 * 1024 * 1024), 10),
-    writeMaxBytes: parseInt(process.env.HOSTINGMCP_MCP_WRITE_MAX_BYTES || String(5 * 1024 * 1024), 10),
-    maxStorageMb: Math.max(0, parseInt(process.env.HOSTINGMCP_MAX_STORAGE_MB || '1024', 10) || 0),
+    maxUploadMb: limits.uploadMb,
+    readMaxBytes: limits.readMaxBytes,
+    writeMaxBytes: limits.writeMaxBytes,
+    jsonBodyLimit: limits.jsonBodyLimit,
+    importMaxUncompressedBytes: limits.importMaxUncompressedBytes,
+    maxStorageMb: (() => {
+      const raw = process.env.HOSTINGMCP_MAX_STORAGE_MB;
+      if (raw === undefined || raw === '') return 1024;
+      const n = parseInt(String(raw), 10);
+      if (!Number.isFinite(n) || n < 0) return 1024;
+      return n;
+    })(),
   };
 }
 
-module.exports = { mcpConfig, parseKeysFromEnv, resolvePublicRoot, KEYS_MAX };
+module.exports = {
+  mcpConfig,
+  parseKeysFromEnv,
+  resolvePublicRoot,
+  resolveUploadLimits,
+  KEYS_MAX,
+};

@@ -19,16 +19,18 @@ Org GitHub / образы: **commercedeployer/hosting-mcp** (GHCR + Docker Hub),
 ## Правила
 
 - Правки сайта — только дерево `public` (path jail).
-- Ключи MCP — только env (`HOSTINGMCP_MCP_KEYS`), до 5; не через MCP tools.
-- Не путать с MyReady (Hugo), Commerce, Deployer.
-- Релиз образа — только CI по тегу `v*`, не push руками.
-- Оффер в Commerce — Hosting 1GB (Store); шаблон `hosting-mcp`: `NAME` + опциональный `CUSTOM_DOMAIN`, лимит диска `HOSTINGMCP_MAX_STORAGE_MB`.
+- Ключи MCP — env `HOSTINGMCP_MCP_KEYS` (до 5).
+- Квоты: `HOSTINGMCP_MAX_STORAGE_MB` (диск), `HOSTINGMCP_MCP_MAX_UPLOAD_MB` (один рычаг размера MCP-загрузки).
+- Не путать с MyReady / Commerce / Deployer.
+- Релиз образа — только CI по тегу `v*`.
+- Оффер в Commerce: шаблон `hosting-mcp` (`NAME`, `CUSTOM_DOMAIN`, …) — сам Commerce не правим из этого репо.
 
 ## Старт MCP-сессии
 
 1. `hostingmcp_capabilities`
 2. Resource `hostingmcp://docs/mcp-agent`
-3. `hostingmcp_files_*` для правок (live, без build)
+3. `hostingmcp_files_*` для правок (live, без build); целый сайт — `hostingmcp_files_import_zip`
+4. `hostingmcp_site_smoke` после выкладки
 
 ## Шаблон Deployer
 

@@ -16,16 +16,20 @@ RUN apk add --no-cache nodejs ca-certificates \
 
 COPY --from=builder-filebrowser /bin/filebrowser /usr/local/bin/filebrowser
 COPY --from=builder-mcp /opt/hosting-mcp/mcp-server /opt/hosting-mcp/mcp-server
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY nginx/default.conf.template /opt/hosting-mcp/nginx/default.conf.template
 COPY docker/entrypoint.sh /entrypoint.sh
 COPY public/index.html /opt/hosting-mcp/seed/index.html
 COPY VERSION /opt/hosting-mcp/VERSION
 
-RUN chmod +x /entrypoint.sh /usr/local/bin/filebrowser
+RUN chmod +x /entrypoint.sh /usr/local/bin/filebrowser \
+  && sed -e 's|__MCP_BODY__|50m|g' -e 's|__FILES_BODY__|100m|g' \
+       /opt/hosting-mcp/nginx/default.conf.template > /etc/nginx/conf.d/default.conf
 
 ENV PUBLIC_ROOT=/var/www/public \
     HOSTINGMCP_PUBLIC_ROOT=/var/www/public \
-    HOSTINGMCP_MCP_LISTEN=127.0.0.1:3101
+    HOSTINGMCP_MCP_LISTEN=127.0.0.1:3101 \
+    HOSTINGMCP_MAX_STORAGE_MB=1024 \
+    HOSTINGMCP_MCP_MAX_UPLOAD_MB=25
 
 VOLUME ["/var/www/public", "/var/lib/filebrowser"]
 EXPOSE 80

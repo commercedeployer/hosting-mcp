@@ -33,6 +33,13 @@ function createAllTools() {
       handler: handlers.hostingmcp_storage_usage,
     },
     {
+      name: 'hostingmcp_site_smoke',
+      title: 'Site smoke',
+      description: 'Check that index.html exists and local nginx HEAD / responds (best-effort).',
+      inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+      handler: handlers.hostingmcp_site_smoke,
+    },
+    {
       name: 'hostingmcp_files_list',
       title: 'List directory',
       description: 'List files and folders in a path under public.',
@@ -73,7 +80,7 @@ function createAllTools() {
     {
       name: 'hostingmcp_files_write_base64',
       title: 'Write binary file',
-      description: 'Write binary asset (image/font) from base64 under public.',
+      description: 'Write binary asset (image/video/font) from base64. Limit: HOSTINGMCP_MCP_MAX_UPLOAD_MB (capabilities.maxUploadMb). Larger → /files/.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -111,6 +118,40 @@ function createAllTools() {
         additionalProperties: false,
       },
       handler: handlers.hostingmcp_files_move,
+    },
+    {
+      name: 'hostingmcp_files_copy',
+      title: 'Copy path',
+      description: 'Copy a file or directory within public (recursive). Destination must not exist.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          from: { ...PATH_PROP, description: 'Source path' },
+          to: { ...PATH_PROP, description: 'Destination path' },
+        },
+        required: ['from', 'to'],
+        additionalProperties: false,
+      },
+      handler: handlers.hostingmcp_files_copy,
+    },
+    {
+      name: 'hostingmcp_files_import_zip',
+      title: 'Import zip into public',
+      description:
+        'Unpack a base64 zip into public (optional destPath). Size limit: HOSTINGMCP_MCP_MAX_UPLOAD_MB (see capabilities.maxUploadMb). Larger dumps → /files/.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          fileBase64: { type: 'string', description: 'Zip archive as base64' },
+          destPath: {
+            ...PATH_PROP,
+            description: 'Directory under public to extract into; empty = public root',
+          },
+        },
+        required: ['fileBase64'],
+        additionalProperties: false,
+      },
+      handler: handlers.hostingmcp_files_import_zip,
     },
     {
       name: 'hostingmcp_files_delete',

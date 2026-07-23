@@ -94,7 +94,7 @@ function createMcpServer(configOverride) {
   const toolCallGate = createMcpConcurrencyGate(config.concurrency);
 
   const router = express.Router();
-  router.use(express.json({ limit: '6mb' }));
+  router.use(express.json({ limit: config.jsonBodyLimit || '40mb' }));
 
   router.get('/.well-known/oauth-protected-resource', (_req, res) => {
     const base = config.publicBaseUrl || '';

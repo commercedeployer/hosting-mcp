@@ -4,6 +4,8 @@ OSS Docker image: **static site hosting** + **Filebrowser** + **MCP** for AI age
 
 One volume `public` is both the live website (nginx) and the only tree editable via `/files/` and `/mcp`. Write a file → it is live. No build step.
 
+Filebrowser is configured with file/dir modes `0644`/`0755` so nginx (user `nginx`) can serve uploads. On each start the entrypoint also runs `chmod -R a+rX` on `public` to heal older uploads that were created with Filebrowser’s default `0640`/`0750` (those caused HTTP 403).
+
 | Path | Role |
 |------|------|
 | `/` | Site from `/var/www/public` |
@@ -25,17 +27,22 @@ docker compose -f docker-compose.dev.yml up --build
 
 ## Environment
 
-See [`.env.example`](.env.example) and [`mcp-server/docs/MCP-v1-RU.md`](mcp-server/docs/MCP-v1-RU.md).
+Канон: [`.env.example`](.env.example), детали: [`mcp-server/docs/MCP-v1-RU.md`](mcp-server/docs/MCP-v1-RU.md).
 
-| Variable | Purpose |
-|----------|---------|
-| `FILES_USER` / `FILES_PASSWORD` | Filebrowser login (`FILES_PASSWORD` required) |
-| `HOSTINGMCP_MCP_KEYS` | Up to 5 Bearer keys, comma-separated |
-| `HOSTINGMCP_MCP_KEY_1` … `_5` | Alternative / extra keys |
-| `HOSTINGMCP_MCP_TOOLS_DENY` | Optional tool denylist |
-| `HOSTINGMCP_PUBLIC_BASE_URL` | Public base URL (Cursor hints), no trailing slash |
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `FILES_PASSWORD` | — | Filebrowser (**required**) |
+| `FILES_USER` | `admin` | Filebrowser login |
+| `HOSTINGMCP_MCP_KEYS` | — | Up to 5 Bearer keys |
+| `HOSTINGMCP_PUBLIC_BASE_URL` | from FREE/CUSTOM | Public site URL |
+| `HOSTINGMCP_FREE_HOST` | — | Free hostname |
+| `HOSTINGMCP_CUSTOM_DOMAIN` | — | Custom domain |
+| `HOSTINGMCP_MAX_STORAGE_MB` | `1024` | Soft disk quota (MCP writes) |
+| `HOSTINGMCP_MCP_MAX_UPLOAD_MB` | `25` | Max MCP upload (file/zip); drives JSON + nginx `/mcp` limits |
 
-Recommended key shape: `mch_mcp_live_…` (any long random secret works).
+Optional: `HOSTINGMCP_MCP_KEY_1`…`_5`, `HOSTINGMCP_MCP_TOOLS_DENY`.
+
+Recommended key: `mch_mcp_live_…`.
 
 ## MCP (agents)
 

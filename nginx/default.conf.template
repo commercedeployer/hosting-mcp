@@ -18,7 +18,7 @@ server {
         proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
-        client_max_body_size 100m;
+        client_max_body_size __FILES_BODY__;
     }
 
     location = /files {
@@ -34,10 +34,16 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
         proxy_read_timeout 300s;
-        client_max_body_size 20m;
+        # Body size filled by entrypoint from HOSTINGMCP_MCP_MAX_UPLOAD_MB.
+        client_max_body_size __MCP_BODY__;
     }
 
     location / {
         try_files $uri $uri/ =404;
+        error_page 404 /404.html;
+    }
+
+    location = /404.html {
+        internal;
     }
 }

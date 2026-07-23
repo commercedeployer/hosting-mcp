@@ -18,6 +18,10 @@
 
 ## Files
 
+### hostingmcp_site_smoke
+Аргументы: нет.  
+Есть ли `index.html`, ответ локального nginx на `HEAD /` (best-effort).
+
 ### hostingmcp_files_list
 `{ "path": "" }` — листинг каталога (пусто = корень).
 
@@ -28,13 +32,21 @@
 `{ "path": "index.html", "content": "<!DOCTYPE html>…" }` — создать/перезаписать. Сразу на сайте.
 
 ### hostingmcp_files_write_base64
-`{ "path": "img/logo.png", "fileBase64": "…" }` — бинарные ассеты.
+`{ "path": "assets/video/hero.webm", "fileBase64": "…" }` — бинарные ассеты (картинки, видео, шрифты).
+
+Лимит: env **`HOSTINGMCP_MCP_MAX_UPLOAD_MB`** (по умолчанию **25**). В capabilities — `maxUploadMb` / `writeMaxBytes`. Крупнее — `/files/`.
+
+### hostingmcp_files_import_zip
+`{ "fileBase64": "…", "destPath": "" }` — распаковать zip в `public`. Архив ≤ upload limit; распакованное — до ~4× upload (мин. 100 MiB) и квота `HOSTINGMCP_MAX_STORAGE_MB`.
 
 ### hostingmcp_files_mkdir
 `{ "path": "css" }` — mkdir -p.
 
 ### hostingmcp_files_move
-`{ "from": "a.html", "to": "b.html" }` — rename/move внутри public.
+`{ "from": "a.html", "to": "b.html" }` — rename/move внутри public (без лимита размера).
+
+### hostingmcp_files_copy
+`{ "from": "a.html", "to": "b.html" }` — копирование (рекурсивно для каталогов); `to` не должен существовать.
 
 ### hostingmcp_files_delete
 `{ "path": "old.html" }` — **destructive**. Корень `public` нельзя.
