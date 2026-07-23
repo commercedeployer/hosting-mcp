@@ -1,7 +1,7 @@
 # hosting-mcp — nginx (static public) + Filebrowser (/files/) + MCP (/mcp)
 ARG FB_VERSION=2.60.0
 
-FROM node:20-alpine AS builder-mcp
+FROM node:26-alpine AS builder-mcp
 WORKDIR /opt/hosting-mcp/mcp-server
 COPY mcp-server/package.json ./
 RUN npm install --omit=dev --no-audit --no-fund
