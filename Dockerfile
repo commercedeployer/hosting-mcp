@@ -9,7 +9,7 @@ COPY mcp-server/ ./
 
 FROM filebrowser/filebrowser:v${FB_VERSION} AS builder-filebrowser
 
-FROM nginx:1.27-alpine
+FROM nginx:1.31-alpine
 
 RUN apk add --no-cache nodejs ca-certificates \
   && mkdir -p /var/www/public /var/lib/filebrowser /opt/hosting-mcp
